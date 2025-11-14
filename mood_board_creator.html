@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Board Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"], input[type="url"], textarea {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            min-width: 200px;
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .color-picker-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .board {
+            background: white;
+            min-height: 600px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            position: relative;
+        }
+
+        .board-item {
+            position: absolute;
+            cursor: move;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: box-shadow 0.3s;
+        }
+
+        .board-item:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .board-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .text-item {
+            background: white;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            min-width: 150px;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .color-item {
+            width: 100px;
+            height: 100px;
+            border: 3px solid white;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(255, 71, 87, 0.4);
+        }
+
+        .board-item:hover .delete-btn {
+            display: flex;
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            cursor: nwse-resize;
+            display: none;
+        }
+
+        .board-item:hover .resize-handle {
+            display: block;
+        }
+
+        .clear-board {
+            background: #ff4757;
+            margin-left: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 100px 20px;
+            font-size: 1.2em;
+        }
+
+        .sample-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .sample-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        .sample-img:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            input[type="text"], input[type="url"], textarea {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Mood Board Creator ✨</h1>
+            <p class="subtitle">Collect images, colors, and ideas visually</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <input type="url" id="imageUrl" placeholder="Paste image URL...">
+                <button onclick="addImageFromUrl()">Add Image</button>
+            </div>
+
+            <div class="control-group">
+                <textarea id="textInput" placeholder="Add your ideas, quotes, or notes..."></textarea>
+                <button onclick="addText()">Add Text</button>
+            </div>
+
+            <div class="color-picker-group">
+                <input type="color" id="colorPicker" value="#667eea">
+                <button onclick="addColor()">Add Color</button>
+            </div>
+
+            <button class="clear-board" onclick="clearBoard()">Clear Board</button>
+        </div>
+
+        <div class="board" id="board">
+            <div class="empty-state" id="emptyState">
+                Start creating your mood board by adding images, text, or colors!<br>
+                Drag items to arrange them. Hover to resize or delete.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let draggedItem = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isResizing = false;
+        let resizeItem = null;
+
+        function addImageFromUrl() {
+            const url = document.getElementById('imageUrl').value.trim();
+            if (!url) {
+                alert('Please enter an image URL');
+                return;
+            }
+
+            const img = document.createElement('div');
+            img.className = 'board-item';
+            img.style.left = Math.random() * 60 + 10 + '%';
+            img.style.top = Math.random() * 60 + 10 + '%';
+            img.style.width = '200px';
+            img.style.height = '200px';
+            img.innerHTML = `
+                <img src="${url}" alt="Mood board image">
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+                <div class="resize-handle"></div>
+            `;
+
+            document.getElementById('board').appendChild(img);
+            document.getElementById('imageUrl').value = '';
+            hideEmptyState();
+            makeDraggable(img);
+            makeResizable(img);
+        }
+
+        function addText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('Please enter some text');
+                return;
+            }
+
+            const textItem = document.createElement('div');
+            textItem.className = 'board-item text-item';
+            textItem.style.left = Math.random() * 60 + 10 + '%';
+            textItem.style.top = Math.random() * 60 + 10 + '%';
+            textItem.innerHTML = `
+                ${text}
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            `;
+
+            document.getElementById('board').appendChild(textItem);
+            document.getElementById('textInput').value = '';
+            hideEmptyState();
+            makeDraggable(textItem);
+        }
+
+        function addColor() {
+            const color = document.getElementById('colorPicker').value;
+
+            const colorItem = document.createElement('div');
+            colorItem.className = 'board-item color-item';
+            colorItem.style.left = Math.random() * 70 + 10 + '%';
+            colorItem.style.top = Math.random() * 70 + 10 + '%';
+            colorItem.style.backgroundColor = color;
+            colorItem.innerHTML = `
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+                <div class="resize-handle"></div>
+            `;
+
+            document.getElementById('board').appendChild(colorItem);
+            hideEmptyState();
+            makeDraggable(colorItem);
+            makeResizable(colorItem);
+        }
+
+        function makeDraggable(element) {
+            element.addEventListener('mousedown', function(e) {
+                if (e.target.classList.contains('delete-btn') || 
+                    e.target.classList.contains('resize-handle')) {
+                    return;
+                }
+
+                draggedItem = element;
+                const rect = element.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                element.style.zIndex = 1000;
+            });
+        }
+
+        function makeResizable(element) {
+            const handle = element.querySelector('.resize-handle');
+            if (!handle) return;
+
+            handle.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+                isResizing = true;
+                resizeItem = element;
+            });
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            if (draggedItem && !isResizing) {
+                const board = document.getElementById('board');
+                const boardRect = board.getBoundingClientRect();
+                
+                let newLeft = e.clientX - boardRect.left - offsetX;
+                let newTop = e.clientY - boardRect.top - offsetY;
+
+                newLeft = Math.max(0, Math.min(newLeft, boardRect.width - draggedItem.offsetWidth));
+                newTop = Math.max(0, Math.min(newTop, boardRect.height - draggedItem.offsetHeight));
+
+                draggedItem.style.left = newLeft + 'px';
+                draggedItem.style.top = newTop + 'px';
+            }
+
+            if (isResizing && resizeItem) {
+                const board = document.getElementById('board');
+                const boardRect = board.getBoundingClientRect();
+                const itemRect = resizeItem.getBoundingClientRect();
+
+                let newWidth = e.clientX - itemRect.left;
+                let newHeight = e.clientY - itemRect.top;
+
+                newWidth = Math.max(50, Math.min(newWidth, boardRect.width - (itemRect.left - boardRect.left)));
+                newHeight = Math.max(50, Math.min(newHeight, boardRect.height - (itemRect.top - boardRect.top)));
+
+                resizeItem.style.width = newWidth + 'px';
+                resizeItem.style.height = newHeight + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (draggedItem) {
+                draggedItem.style.zIndex = '';
+                draggedItem = null;
+            }
+            isResizing = false;
+            resizeItem = null;
+        });
+
+        function deleteItem(btn) {
+            btn.parentElement.remove();
+            checkEmptyState();
+        }
+
+        function clearBoard() {
+            if (confirm('Are you sure you want to clear the entire board?')) {
+                const board = document.getElementById('board');
+                const items = board.querySelectorAll('.board-item');
+                items.forEach(item => item.remove());
+                checkEmptyState();
+            }
+        }
+
+        function hideEmptyState() {
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function checkEmptyState() {
+            const board = document.getElementById('board');
+            const items = board.querySelectorAll('.board-item');
+            if (items.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.id === 'imageUrl') {
+                addImageFromUrl();
+            }
+            if (e.key === 'Enter' && e.ctrlKey && e.target.id === 'textInput') {
+                addText();
+            }
+        });
+    </script>
+</body>
+</html>
